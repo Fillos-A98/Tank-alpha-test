@@ -13,7 +13,7 @@ TILE = 32
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 
-lose_sound = pygame.mixer.Sound("sounds/destroy.wav")
+#lose_sound = pygame.mixer.Sound("sounds/destroy.wav")
 
 fontUI = pygame.font.Font(None, 30)
 
@@ -250,22 +250,6 @@ Tank('blue', 100, 275, 0, (pygame.K_a, pygame.K_d, pygame.K_w, pygame.K_s, pygam
 Tank('red', 650, 275, 0, (pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN, pygame.K_l))
 ui = UI()
 
-myimage = pygame_menu.baseimage.BaseImage(
-    image_path = 'bg.jpg',
-    drawing_mode = pygame_menu.baseimage.IMAGE_MODE_REPEAT_XY,
-)
-
-mytheme = pygame_menu.themes.THEME_DARK.copy()
-mytheme.title_background_color = (255, 255, 255, 0)
-mytheme.background_color = myimage
-
-menu = pygame_menu.Menu('Welcome', 400, 300,
-                       theme=mytheme)
-
-menu.add.text_input('Name >_', default='')
-menu.add.button('Play')
-menu.add.button('Quit', pygame_menu.events.EXIT)
-
 for _ in range(50):
     while True:
         x = randint(0, WIDTH // TILE - 1) * TILE
@@ -281,7 +265,27 @@ for _ in range(50):
 
 bonusTimer = 180
 
-play = True
+def start_the_game():
+    global run
+    run = True
+    menu.disable()
+
+myimage = pygame_menu.baseimage.BaseImage(
+    image_path = 'images/bg.jpg',
+    drawing_mode = pygame_menu.baseimage.IMAGE_MODE_REPEAT_XY,
+)
+
+mytheme = pygame_menu.themes.THEME_DARK.copy()
+mytheme.title_background_color = (255, 255, 255, 0)
+mytheme.background_color = myimage
+
+menu = pygame_menu.Menu('Welcome', 400, 300,
+                       theme=mytheme)
+
+menu.add.text_input('Name >_', default='')
+menu.add.button('Play', start_the_game)
+menu.add.button('Quit', pygame_menu.events.EXIT)
+
 finish = False
 while play:
     for event in pygame.event.get():
