@@ -320,5 +320,5 @@ while play:
     pygame.display.update()
     clock.tick(FPS)
     menu.mainloop(window)
-lose_sound.play()
+#lose_sound.play()
 pygame.quit()
