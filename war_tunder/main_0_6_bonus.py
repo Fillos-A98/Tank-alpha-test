@@ -12,8 +12,15 @@ TILE = 32
 
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
+pygame.display.set_caption("Tank 2 player game")
 
-#lose_sound = pygame.mixer.Sound("sounds/destroy.wav")
+
+start_sound = pygame.mixer.Sound("sounds/level_start.mp3")
+lose_sound = pygame.mixer.Sound("sounds/level_finish.mp3")
+shot_sound = pygame.mixer.Sound("sounds/shot.wav")
+move_sound = pygame.mixer.Sound("sounds/move.wav")
+engine_sound = pygame.mixer.Sound("sounds/engine.wav")
+
 
 fontUI = pygame.font.Font(None, 30)
 
@@ -36,6 +43,7 @@ imgBangs = [
 imgBonuses = [
     pygame.image.load('images/bonus_star.png'),
     pygame.image.load('images/bonus_tank.png'),
+    pygame.image.load('images/bonus_helmet.png'),
     ]
 
 DIRECTS = [[0, -1], [1, 0], [0, 1], [-1, 0]]
@@ -66,11 +74,11 @@ class UI:
                 rect = text.get_rect(center = (5 + i * 70 + 32, 5 + 11))
                 window.blit(text, rect)
                 i += 1
-                
 
 class Tank:
     def __init__(self, color, px, py, direct, keyList):
         objects.append(self)
+        self.move = False
         self.type = 'tank'
         self.color = color
         self.rect = pygame.Rect(px, py, TILE, TILE)
@@ -92,7 +100,9 @@ class Tank:
         self.rank = 0
         self.image = pygame.transform.rotate(imgTanks[self.rank], -self.direct * 90)
         self.rect = self.image.get_rect(center = self.rect.center)
-
+        for obj in objects:
+            if obj != self and obj.type == 'block' and 'block2' and self.rect.colliderect(obj.rect):
+                self.rect.right = obj.rect.left
     def update(self):
         self.image = pygame.transform.rotate(imgTanks[self.rank], -self.direct * 90)
         self.image = pygame.transform.scale(self.image, (self.image.get_width() - 5, self.image.get_height() - 5))
@@ -107,6 +117,8 @@ class Tank:
         if keys[self.keyLEFT] and self.rect.x > 0:
             self.rect.x -= self.moveSpeed
             self.direct = 3
+            if move_sound.get_num_channels() == 0:
+                move_sound.play()
         elif keys[self.keyRIGHT] and self.rect.x < WIDTH - TILE:
             self.rect.x += self.moveSpeed
             self.direct = 1
@@ -118,10 +130,11 @@ class Tank:
             self.direct = 2
 
         for obj in objects:
-            if obj != self and obj.type == 'block' and self.rect.colliderect(obj.rect):
+            if obj != self and obj.type == 'block' and 'block2' and self.rect.colliderect(obj.rect):
                 self.rect.topleft = oldX, oldY
 
         if keys[self.keySHOT] and self.shotTimer == 0:
+            shot_sound.play()
             dx = DIRECTS[self.direct][0] * self.bulletSpeed
             dy = DIRECTS[self.direct][1] * self.bulletSpeed
             Bullet(self, self.rect.centerx, self.rect.centery, dx, dy, self.bulletDamage)
@@ -134,7 +147,6 @@ class Tank:
 
     def damage(self, value):
         self.hp -= value
-
 
 class Bullet:
     def __init__(self, parent, px, py, dx, dy, damage):
@@ -179,7 +191,7 @@ class Bang:
         image = imgBangs[int(self.frame)]
         rect = image.get_rect(center = (self.px, self.py))
         window.blit(image, rect)
-    
+
 class Block:
     def __init__(self, px, py, size):
         objects.append(self)
@@ -246,9 +258,26 @@ result_lb =  Text("", 200, 200, font_size= 50, color=(255, 255, 255))
 
 bullets = []
 objects = []
-Tank('blue', 100, 275, 0, (pygame.K_a, pygame.K_d, pygame.K_w, pygame.K_s, pygame.K_SPACE))
-Tank('red', 650, 275, 0, (pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN, pygame.K_l))
 ui = UI()
+
+def start_the_game():
+    global run
+    run = True
+    menu.disable()
+    Tank('blue', 100, 275, 0, (pygame.K_a, pygame.K_d, pygame.K_w, pygame.K_s, pygame.K_SPACE))
+    Tank('red', 650, 275, 0, (pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN, pygame.K_l))
+    start_sound.play()
+    engine_sound.play()
+
+def start_the_game1():
+    global run
+    run = True
+    menu.disable()
+    Tank('blue', 100, 275, 0, (pygame.K_a, pygame.K_d, pygame.K_w, pygame.K_s, pygame.K_SPACE))
+    Tank('red', 660, 275, 0, (pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN, pygame.K_l))
+    Tank('red', 650, 275, 0, (pygame.K_f, pygame.K_h, pygame.K_t, pygame.K_g, pygame.K_b))
+    start_sound.play()
+    engine_sound.play()
 
 for _ in range(50):
     while True:
@@ -265,32 +294,35 @@ for _ in range(50):
 
 bonusTimer = 180
 
-def start_the_game():
-    global run
-    run = True
-    menu.disable()
-
 myimage = pygame_menu.baseimage.BaseImage(
-    image_path = 'images/bg.jpg',
+    image_path = 'images/pochwa.png',
     drawing_mode = pygame_menu.baseimage.IMAGE_MODE_REPEAT_XY,
 )
 
 mytheme = pygame_menu.themes.THEME_DARK.copy()
 mytheme.title_background_color = (255, 255, 255, 0)
 mytheme.background_color = myimage
+mytheme.font = pygame_menu.font.FONT_MUNRO
 
-menu = pygame_menu.Menu('Welcome', 400, 300,
+
+menu = pygame_menu.Menu('', 800, 600,
                        theme=mytheme)
 
-menu.add.text_input('Name >_', default='')
-menu.add.button('Play', start_the_game)
-menu.add.button('Quit', pygame_menu.events.EXIT)
+menu.add.text_input('Name ', default='>_')
+menu.add.button('Гра для 2', start_the_game)
+menu.add.button('Гра для 3', start_the_game1)
+menu.add.button('Створювачі', )
+menu.add.button('Вийти', pygame_menu.events.EXIT)
+
+menu.mainloop(window)
 
 finish = False
-while play:
+while start_the_game:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
+            finish = False
             play = False
+            start_the_game = False
 
     keys = pygame.key.get_pressed()
 
@@ -299,7 +331,7 @@ while play:
         else:
             Bonus(randint(50, WIDTH - 50), randint(50, HEIGHT - 50), randint(0, len(imgBonuses) - 1))
             bonusTimer = randint(120, 240)
-        
+
         for bullet in bullets: bullet.update()
         for obj in objects:
             obj.update()
@@ -307,9 +339,11 @@ while play:
                 if obj.hp <= 0:
                     finish = True
                     if obj.color == "red":
-                        result_lb.set_text("Переміг гравець cправа")
+                        lose_sound.play()
+                        result_lb.set_text("Переміг червоний")
                     else:
-                        result_lb.set_text("Переміг гравець зліва")
+                        lose_sound.play()
+                        result_lb.set_text("Переміг синій")
 
         ui.update()
 
@@ -319,10 +353,9 @@ while play:
     for obj in objects: obj.draw()
     ui.draw()
     result_lb.draw()
-    
-    
+
+
     pygame.display.update()
     clock.tick(FPS)
-    menu.mainloop(window)
 #lose_sound.play()
 pygame.quit()
