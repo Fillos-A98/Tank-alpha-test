@@ -295,14 +295,14 @@ for _ in range(50):
 bonusTimer = 180
 
 myimage = pygame_menu.baseimage.BaseImage(
-    image_path = 'images/pochwa.png',
+    image_path = 'images/block_brick.png',
     drawing_mode = pygame_menu.baseimage.IMAGE_MODE_REPEAT_XY,
 )
 
 mytheme = pygame_menu.themes.THEME_DARK.copy()
 mytheme.title_background_color = (255, 255, 255, 0)
 mytheme.background_color = myimage
-mytheme.font = pygame_menu.font.FONT_MUNRO
+mytheme.font = pygame_menu.font.FONT_COMIC_NEUE
 
 
 menu = pygame_menu.Menu('', 800, 600,
@@ -340,10 +340,10 @@ while start_the_game:
                     finish = True
                     if obj.color == "red":
                         lose_sound.play()
-                        result_lb.set_text("Переміг червоний")
+                        result_lb.set_text("Переміг синій")
                     else:
                         lose_sound.play()
-                        result_lb.set_text("Переміг синій")
+                        result_lb.set_text("Переміг червоний")
 
         ui.update()
 
